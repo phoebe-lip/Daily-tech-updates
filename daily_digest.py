@@ -78,3 +78,33 @@ if __name__ == "__main__":
     subject = f"🛰️ Frontier Daily — {datetime.now().strftime('%Y-%m-%d')}"
     send_email(subject, digest)
     print("Digest sent successfully!")
+
+name: Daily Frontier Tech Digest
+
+on:
+  schedule:
+    - cron: '30 8 * * *'  # Runs every day at 08:30 UTC
+  workflow_dispatch:
+
+jobs:
+  run_digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai feedparser
+      - name: Run daily digest
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OUTLOOK_EMAIL: ${{ secrets.OUTLOOK_EMAIL }}
+          OUTLOOK_PASSWORD: ${{ secrets.OUTLOOK_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+        run: |
+          python daily_digest.py
+
